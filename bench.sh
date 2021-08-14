@@ -33,10 +33,10 @@ fi
 
 info "Execute benchmark"
 # curl ...
-ssh isucon@app1 -t 'cd ~/isuumo/bench/ && ./bench'
-sleep 5
-for i in $HOSTS
+ssh isucon@app1 -t 'cd ~/isuumo/bench/ && ./bench' &
+for h in $HOSTS
 do
-	rsync -Cva $i:~/isucon11q/tools/log ~/
+	grep -m 1 "Successfully stopped logging" <(ssh -T $h 'journalctl -f -n 0 2>&1')
+	rsync -Cva $h:~/isucon11q/tools/log ~/
 done
 
