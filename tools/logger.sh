@@ -113,7 +113,7 @@ get_last_dir() {
 next_id() {
 	last_id=$(get_last_dir)
 	last_id=$((last_id + 1))
-	branch=$(git branch --show-current)
+	branch=$(git branch --show-current || true)
 	printf '%s-%04d' $branch $last_id
 }
 
