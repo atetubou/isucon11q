@@ -15,6 +15,7 @@ update_if_differ mysql /home/isucon/isucon11q///etc/mysql/conf.d/my.cnf /etc/mys
 update_if_differ mysql /home/isucon/isucon11q///etc/mysql/conf.d/mysqldump.cnf /etc/mysql/conf.d/mysqldump.cnf
 update_if_differ mysql /home/isucon/isucon11q///etc/mysql/conf.d/mysql.cnf /etc/mysql/conf.d/mysql.cnf
 update_if_differ mysql /home/isucon/isucon11q///etc/mysql/my.cnf /etc/mysql/my.cnf
+update_if_differ mysql /home/isucon/isucon11q///0_Schema.sql /home/isucon/isuumo/webapp/mysql/db/0_Schema.sql
 ensure_mysql_syntax
 restart_service_if_updated mysql
 
