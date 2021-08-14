@@ -1,0 +1,18 @@
+[Unit]
+Description=log viewer
+
+[Service]
+WorkingDirectory=/home/vagrant/log
+PIDFile=/home/vagrant/log/log.pid
+
+User=vagrant
+Group=vagrant
+ExecStart=/home/vagrant/isucon11q/logviewer/logviewer
+ExecStop=/bin/kill -s QUIT $MAINPID
+
+Restart   = always
+Type      = simple
+
+[Install]
+WantedBy=multi-user.target
+
