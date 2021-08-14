@@ -113,7 +113,7 @@ get_last_dir() {
 next_id() {
 	last_id=$(get_last_dir)
 	last_id=$((last_id + 1))
-	branch=$(git branch --show-current || true)
+	branch=$(git branch --show-current 2>/dev/null || true)
 	printf '%s-%04d' $branch $last_id
 }
 
@@ -144,7 +144,7 @@ record_git_information() {
 	FILENAME=$(log_file_name_of git txt)
 	date >>$FILENAME
 
-	echo "Branch: $(git branch --show-current)" >>$FILENAME
+	echo "Branch: $(git branch --show-current 2>/dev/null)" >>$FILENAME
 	echo "git diff $CURRENT_COMMIT" >>$FILENAME
 	git diff $CURRENT_COMMIT >>$FILENAME 2>&1
 }
