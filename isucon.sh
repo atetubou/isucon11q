@@ -276,13 +276,7 @@ EOF
 	setup_mysql
 	setup_systemd
 	echo "Generated $INIT_SH."
-
-	if yes_or_no "Shall I copy init.sh, isucon.sh, and logger.sh to /usr/bin?"
-	then
-		sudo ln -sr ./tools/logger.sh /usr/bin
-		sudo ln -sr ./isucon.sh /usr/bin
-		sudo ln -sr ./init.sh /usr/bin
-	fi
+	echo "Do not forget to run './isucon.sh install' in order to copy *.sh to /usr/bin."
 }
 
 add_main() {
@@ -319,11 +313,18 @@ show_help_and_exit() {
 	echo "Usage: $0 init                   generate init.sh" >&2
 	echo "       $0 add SERVICE FROM TO    copy TARGET to pwd and append update script to init.sh" >&2
 	echo "                                 associated with SERVICE" >&2
+	echo "       $0 install                copy *.sh to /usr/bin" >&2
 	echo "       $0 mysql                  show mysql information" >&2
 	echo "Example:" >&2
 	echo "$0 init " >&2
 	echo "$0 add isubata.golang.service /home/isucon/isubata/webapp/public ./public " >&2
 	exit ${1:-0}
+}
+
+install_main() {
+	sudo ln -sr ./tools/logger.sh /usr/bin
+	sudo ln -sr ./isucon.sh /usr/bin
+	sudo ln -sr ./init.sh /usr/bin
 }
 
 main() {
@@ -349,6 +350,10 @@ main() {
 		mysql)
 			mysql_main $@
 			;;
+		install)
+			install_main $@
+			;;
+
 		help | -h | --help)
 			show_help_and_exit
 			;;
