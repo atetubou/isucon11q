@@ -6,7 +6,7 @@ source ./util.sh
 NGINX_LOG_FILE=/var/log/nginx/detailed.log
 MYSQL_LOG_FILE=/var/log/mysql/mysql-slow.log
 LOG_DIR=./log
-CPUPROF_FILE=/tmp/cpu.prof
+CPUPROF_FOLDER=/tmp/isucon/
 ALP_CONF=./alpconfig.yml
 
 show_help_and_exit() {
@@ -168,8 +168,13 @@ record_nginx_log() {
 	cat $(log_file_name_of nginx) | alp --config "$ALP_CONF"  > "$(log_file_name_of nginxalp txt)" || return 1
 }
 record_cpuprof() {
-	cp $CPUPROF_FILE $(log_file_name_of cpuprof) || return 1
-	go tool pprof -list='main.*' $(log_file_name_of cpuprof) >$(log_file_name_of cpuproflist txt) || return 1
+	for i in $(ls $CPUPROF_FOLDER/*.prof)
+	do
+		filename=$(basename $i)
+		base=${filename%.*}
+		cp $CPUPROF_FILE $(log_file_name_of $base prof) || return 1
+	done
+	go tool pprof -list='main.*' $(log_file_name_of cpu prof) >$(log_file_name_of cpuproflist txt) || return 1
 }
 stop_logging() {
 	if [ $# -ge 1 ]
