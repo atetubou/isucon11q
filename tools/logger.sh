@@ -108,7 +108,7 @@ maximum_of() {
 }
 get_last_dir() {
 	# find the last directory (i.e. with a name of the largest number)
-	maximum_of $(find $LOG_DIR -maxdepth 1 -type d | sed -n -e  's@\([0-9][0-9]*\)$@\1@p')
+	maximum_of $(find $LOG_DIR -maxdepth 1 -type d | grep -o -E '[0-9]+$')
 }
 next_id() {
 	last_id=$(get_last_dir)
