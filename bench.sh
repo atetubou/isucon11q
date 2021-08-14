@@ -24,4 +24,8 @@ xpanes -c "ssh {} -t 'init.sh'; read -p 'Press enter to continue> ' && exit"  $H
 info "Execute benchmark"
 # curl ...
 ssh isucon@app1 -t 'cd ~/isuumo/bench/ && ./bench'
+for i in $HOSTS
+do
+	rsync -Cva $i:~/isucon11q/tools/log ~/
+done
 
