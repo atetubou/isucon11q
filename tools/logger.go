@@ -34,10 +34,11 @@ var stopLoggerToken = make(chan bool, 1)
 
 const LoggerBashScript = "/usr/bin/logger.sh"
 const BenchmarkTime = 60
-const LogFilePath = "/tmp/"
+const LogFilePath = "/tmp/isucon/"
 
 func init() {
 	startLoggerToken <- true
+	os.MkdirAll(LogFilePath, os.ModePerm)
 }
 
 func ExecuteCommand(bashscript string) (string, error) {
@@ -88,7 +89,7 @@ L:
 
 	// start logger
 	log.Print(MustExecuteCommand(LoggerBashScript + " start " + id))
-	f, err := os.Create("/tmp/cpu.prof")
+	f, err := os.Create(filepath.Join(LogFilePath, "cpu.prof"))
 	if err != nil {
 		panic(err)
 	}
