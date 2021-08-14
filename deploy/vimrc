@@ -1,0 +1,40 @@
+" clipboard
+set clipboard=unnamed
+
+" 日本語のtextwidth
+set fo+=m
+
+set showcmd
+
+set tabpagemax=25
+set incsearch
+set wildmenu
+au   BufEnter *   execute ":lcd " . expand("%:p:h") . ""
+
+" Basics
+set tabstop=4
+set shiftwidth=4
+set number
+set autoindent
+set nocompatible
+syntax on
+filetype plugin indent on
+set backspace=indent,eol,start
+set enc=utf-8
+set fenc=utf-8
+set fileencodings=utf-8,sjis,euc-jp
+set hidden
+
+
+" 改行コードの自動認識
+set fileformats=unix,dos,mac
+" □とか○の文字があってもカーソル位置がずれないようにする
+if exists('&ambiwidth')
+  set ambiwidth=double
+endif
+
+" tab
+nmap <C-H> :tabprevious<CR>
+nmap <C-L> :tabnext<CR>
+nmap <C-T> :tabnew<CR>
+
