@@ -19,7 +19,7 @@ then
 fi
 
 info "Execute init.sh"
-xpanes -c "ssh {} -t 'init.sh'" $HOSTS
+xpanes -c "ssh {} -t 'init.sh'; read -p 'Press enter to continue> ' && exit"  $HOSTS
 
 info "Execute benchmark"
 # curl ...
