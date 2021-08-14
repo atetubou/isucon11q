@@ -21,9 +21,16 @@ then
 fi
 
 info "Execute init.sh"
-xpanes -c "ssh {} -t '$PRECOMMAND init.sh'; read -p 'Press enter to continue> ' && exit"  $HOSTS
+if [ -n "${TMUX:-}" ]
+then
+	tmux set-window-option synchronize-panes 0
+	xpanes -x -s -c "ssh {} -t '$PRECOMMAND init.sh'; read -p 'Press enter to continue> ' && exit"  $HOSTS
+	tmux set-window-option synchronize-panes 1
+	read -p 'Press enter to continue> '
+else
+	xpanes -s -c "ssh {} -t '$PRECOMMAND init.sh'; read -p 'Press enter to continue> ' && exit"  $HOSTS
+fi
 
-sleep 1
 info "Execute benchmark"
 # curl ...
 ssh isucon@app1 -t 'cd ~/isuumo/bench/ && ./bench'
