@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime/trace"
 	"sort"
 	"strconv"
 	"strings"
@@ -239,6 +240,13 @@ func init() {
 	json.Unmarshal(jsonText, &estateSearchCondition)
 }
 
+func TraceMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		defer trace.StartRegion(c.Request().Context(), c.Path()).End()
+		return next(c)
+	}
+}
+
 func main() {
 	// Echo instance
 	e := echo.New()
@@ -248,6 +256,7 @@ func main() {
 	// Middleware
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
+	e.Use(TraceMiddleware)
 
 	// Initialize
 	e.POST("/initialize", initialize)
