@@ -1,0 +1,21 @@
+set editing-mode vi
+
+$if mode=vi
+    set keymap vi-command
+    "gg": beginning-of-history
+    "G": end-of-history
+
+    set keymap vi-insert
+    "\C-l": clear-screen
+    "\C-w": backward-kill-word
+    "\C-a": beginning-of-line
+    "\C-e": end-of-line
+    "\C-f": forward-char
+    "\C-b": backward-char
+    "\M-f": forward-word
+    "\M-b": backward-word
+    "\C-k": kill-line
+
+	# see https://www.gnu.org/software/bash/manual/html_node/Commands-For-Killing.html#Commands-For-Killing
+$endif
+

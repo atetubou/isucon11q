@@ -1,0 +1,9 @@
+[user]
+	name = isucon
+	email = "isucon@example.com"
+[color]
+	ui = true
+[core]
+	editor = vim
+[push]
+	default = simple
