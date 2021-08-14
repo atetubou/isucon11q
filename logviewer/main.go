@@ -114,10 +114,10 @@ func Exec(command string) {
 }
 
 func main() {
-	port := *flag.String("p", "8080", "port to serve on")
-	root := *flag.String("d", ".", "the directory of static file to host")
+	port := flag.String("p", "8080", "port to serve on")
+	root := flag.String("d", ".", "the directory of static file to host")
 	flag.Parse()
 
-	http.Handle("/", LogHandler{root})
-	log.Fatal(http.ListenAndServe(":"+port, nil))
+	http.Handle("/", LogHandler{*root})
+	log.Fatal(http.ListenAndServe(":"+*port, nil))
 }
