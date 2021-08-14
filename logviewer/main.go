@@ -96,10 +96,43 @@ func (h LogHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return nil
 		}
 		proxy.ServeHTTP(w, r)
-		return
+	} else if strings.HasSuffix(filepath, "dstat.log") {
+		// use aha (Ansi HTML Adapter) to display dstat
+		f, err := os.Open(filepath)
+		if err != nil {
+			msg, code := ToHTTPError(err)
+			http.Error(w, msg, code)
+			return
+		}
+		defer f.Close()
+
+		cmd := exec.Command("aha")
+		stdin, _ := cmd.StdinPipe()
+		if err != nil {
+			log.Fatal(err)
+		}
+		content, err := io.ReadAll(f)
+		if err != nil {
+			log.Fatal(err)
+		}
+		io.WriteString(stdin, string(content))
+		stdin.Close()
+		out, _ := cmd.Output()
+		fmt.Fprint(w, string(out))
 	} else {
 		http.ServeFile(w, r, filepath)
 	}
+}
+
+func ToHTTPError(err error) (msg string, httpStatus int) {
+	if os.IsNotExist(err) {
+		return "404 page not found", http.StatusNotFound
+	}
+	if os.IsPermission(err) {
+		return "403 Forbidden", http.StatusForbidden
+	}
+	// Default:
+	return "500 Internal Server Error", http.StatusInternalServerError
 }
 
 func Exec(command string) {
