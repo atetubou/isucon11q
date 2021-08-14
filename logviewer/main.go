@@ -1,8 +1,10 @@
 package main
 
 import (
+	"bytes"
 	"flag"
 	"fmt"
+	"io"
 	"log"
 	"net"
 	"net/http"
@@ -11,6 +13,7 @@ import (
 	"os"
 	"os/exec"
 	"regexp"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -55,7 +58,11 @@ func (h LogHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		if !ok {
 			port = GetAvailablePort()
 			log.Println("Port:", port)
-			Exec(fmt.Sprintf("go tool pprof -http localhost:%d -no_browser %s%s", port, h.root, base))
+			if strings.HasSuffix(base, "trace.prof") {
+				Exec(fmt.Sprintf("go tool trace -http=:%d %s%s", port, h.root, base))
+			} else {
+				Exec(fmt.Sprintf("go tool pprof -http localhost:%d -no_browser %s%s", port, h.root, base))
+			}
 			listeners.path2port[base] = port
 			listeners.Unlock()
 			time.Sleep(time.Second * 1)
@@ -74,6 +81,17 @@ func (h LogHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			if err == nil {
 				s := base + uri.Path
 				res.Header.Set("Location", s)
+			}
+			if strings.HasSuffix(base, "trace.prof") {
+				b, err := io.ReadAll(res.Body)
+				if err != nil {
+					log.Fatal(err)
+				}
+				payload := fmt.Sprintf(`<script type='text/javascript'>function replace_url(elem, attr) { var elems = document.getElementsByTagName(elem); for (var i = 0; i < elems.length; i++) elems[i][attr] = elems[i][attr].replace(/^http:\/\/[^\/]*\//, '%s/'); } replace_url("a", "href");</script>`, base)
+				s := string(b) + payload
+				b = []byte(s)
+				res.Body = io.NopCloser(bytes.NewReader(b))
+				res.Header.Set("Content-Length", strconv.Itoa(len(b)))
 			}
 			return nil
 		}
