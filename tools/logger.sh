@@ -114,7 +114,8 @@ next_id() {
 	last_id=$(get_last_dir)
 	last_id=$((last_id + 1))
 	branch=$(git branch --show-current 2>/dev/null || true)
-	printf '%s-%04d' $branch $last_id
+	[ -n "$branch" ] && branch="$branch-"
+	echo $branch$(printf '%04d' $last_id)
 }
 
 start_logging() {
