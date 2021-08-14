@@ -172,7 +172,7 @@ record_cpuprof() {
 	do
 		filename=$(basename $i)
 		base=${filename%.*}
-		cp $CPUPROF_FILE $(log_file_name_of $base prof) || return 1
+		cp $i $(log_file_name_of $base prof) || return 1
 	done
 	go tool pprof -list='main.*' $(log_file_name_of cpu prof) >$(log_file_name_of cpuproflist txt) || return 1
 }
