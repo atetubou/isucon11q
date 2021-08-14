@@ -27,6 +27,18 @@ type LogHandler struct {
 	root string
 }
 
+func GetAvailablePort() int {
+	testListener, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		panic(err)
+	}
+	port := testListener.Addr().(*net.TCPAddr).Port
+	if err := testListener.Close(); err != nil {
+		panic(err)
+	}
+	return port
+}
+
 func (h LogHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	upath := r.URL.Path
 	if !strings.HasPrefix(upath, "/") {
@@ -37,21 +49,11 @@ func (h LogHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	re := regexp.MustCompile(`^(.*\.prof)(/?.*)`)
 	res := re.FindSubmatch([]byte(upath))
 	if len(res) > 0 {
-		//if path.Ext(upath) == ".prof" {
 		base := string(res[1])
-		//log.Println("profile: " + upath)
-		//log.Println("matched: ", string(res[0]), string(res[1]), string(res[2]))
 		listeners.Lock()
 		port, ok := listeners.path2port[base]
 		if !ok {
-			testListener, err := net.Listen("tcp", "127.0.0.1:0")
-			if err != nil {
-				panic(err)
-			}
-			port = testListener.Addr().(*net.TCPAddr).Port
-			if err := testListener.Close(); err != nil {
-				panic(err)
-			}
+			port = GetAvailablePort()
 			log.Println("Port:", port)
 			Exec(fmt.Sprintf("go tool pprof -http localhost:%d -no_browser %s%s", port, h.root, base))
 			listeners.path2port[base] = port
@@ -60,11 +62,6 @@ func (h LogHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		} else {
 			listeners.Unlock()
 		}
-		//if string(res[2]) == "" || string(res[2]) == "/" {
-		//	r.URL.Path = "/ui/"
-		//} else {
-		//	r.URL.Path = string(res[2])
-		//}
 		r.URL.Path = string(res[2])
 		u, err := url.Parse(fmt.Sprintf("http://localhost:%d/", port))
 		if err != nil {
@@ -73,24 +70,14 @@ func (h LogHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		proxy := httputil.NewSingleHostReverseProxy(u)
 		proxy.ModifyResponse = func(res *http.Response) error {
 			// Change forwarding
-			//log.Println(res)
 			uri, err := res.Location()
 			if err == nil {
 				s := base + uri.Path
-				//log.Println(s)
 				res.Header.Set("Location", s)
 			}
 			return nil
 		}
 		proxy.ServeHTTP(w, r)
-		/*
-			director := func(request *http.Request) {
-				request.URL.Scheme = "http"
-				request.URL.Host = "localhost:9000"
-			}
-			proxy := httputil.ReverseProxy{Director: director}
-			proxy.ServeHTTP(w, r)
-		*/
 		return
 	} else {
 		http.ServeFile(w, r, filepath)
