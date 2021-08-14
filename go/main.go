@@ -308,6 +308,8 @@ func initialize(c echo.Context) error {
 		}
 	}
 
+	StartLogger(GetNextLogID())
+
 	return c.JSON(http.StatusOK, InitializeResponse{
 		Language: "go",
 	})
