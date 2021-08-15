@@ -11,72 +11,49 @@ git clone git@github.com:atetubou/isucon11q.git
 https://qiita.com/tukiyo3/items/092fc32318bd3d1a0846
 
 * サービスの確認
+```
 sudo systemctl list-units --type=service
+```
 
 * サービスの場所
+```
 /etc/systemd/system/*.service
+```
 
 * ログ表示
+```
 sudo journalctl
 sudo journalctl -u isuda.perl
-
-
-## Golangについて
-* Goのビルドでパッケージがないとき
-go get -d -v .
-
-
-* Goのプロファイルのとり方
-go tool pprof isuda /tmp/signalcpu.prof  <<<"list main.*" > list.txt
-
+```
 
 
 ## MySQLについて
 * schemaを得る
+
+```
 mysqldump dbname --no-data | less
-
-
-## TODO
-* Cookieを使ってベンチマーカーのシナリオを抽出
-各シナリオにかかる時間 + ベンチマーカーの挙動を推定することで、点数も推定できるようになるはず。
-
-* 自動的にまとめるべきページをクラスタリングによって抽出
-URLの"/"は絶対的に分割すべきパラメタ
-?以降は基本的に無視してよい
-最初に解析した結果はファイルに書き出して、以降はそれを使う。
-
-
-## packing
-git ls-tree -r --name-only HEAD
-
-
-## Goのアップデート  https://github.com/udhos/update-golang
-git clone https://github.com/udhos/update-golang
-cd update-golang
-sudo ./update-golang.sh
-すると/usr/local/go/bin/goにはいる
-
-
-## goimports
-* インストール
-go get golang.org/x/tools/cmd/goimports
-* 実行
-goimports -w main.go
+```
 
 
 ## slow queryの解析
 mysqldの設定に以下を追加
+```
 slow_query_log = 1
 slow_query_log_file = /var/log/mysql/mysql-slow.log
 long_query_time = 0
+```
 
 解析は次のようにやる。
+```
 mysqldumpslow /var/log/mysql/mysql-slow.log -s t 
+```
 
 
 ## escape sequence
 https://misc.flogisoft.com/bash/tip_colors_and_formatting
+```
 printf '\033[1m\033[33mBold\033[m'
+```
 
 
 ## xpanes
@@ -137,16 +114,29 @@ http://golang.rdy.jp/2016/07/27/concurrency/
 ## 各種設定について
 nginx.confに
 
+```
 worker_rlimit_nofile  65535;
 events {
     worker_connections 2048;
 }
+```
 
 としてconnectionなどを増やすと負荷が高いときにエラーがでなくなる。
 また、Too many open filesに対してfile descriptorの数を増やす。
+
 /etc/security/limits.conf 
+```
 * hard nofile 65535
 * soft nofile 65535
+```
+
+mysqlのmax_connectionも大きくしておくべき
+
+/etc/mysql/mysql.conf.d/mysqld.cnf
+```
+max_connections        = 1000
+```
+
 
 
 ## TODO
@@ -160,54 +150,78 @@ events {
 # 初動など
 
 * コンテスト前
+
 ~/ssh/known_hostsをクリア
 gitレポジトリの作成
 
 * 各サーバのエイリアスを追加
-vim /etc/hosts
+
+```
+sudo tee -a /etc/hosts <<EOF
+192.168.33.11 app1 app1
+192.168.33.12 app2 app2
+192.168.33.13 app3 app3
+EOF
+sudo tee /etc/hostname < app1
+```
+
 
 * 各サーバに鍵を配送
+
+```
 ./ssh/distribute.sh PASSWORD app{1,2,3}
+```
 
 * tmuxを複数ウィンドウで開く
+
+```
 xpanes -c "ssh {}" app{1,2,3}
+```
 
 * サーバにgitを配置して初期化
-git clone git@bitbucket.org:tailed/isucon8q.git
-cd isucon8q
+
+```
+git clone $REPOSITORY_URL
+cd isucon11q
 ./isucon.sh init
 git add ./etc ./go init.sh
 git commit -a
 git push
+```
 
 * logger.sh, logger.goを配置
-sudo ln -sr ./logger.sh /usr/bin
-sudo ln -sr ./isucon.sh /usr/bin
-ln -sr ./logger.go ./go
 
-* init.shについてgoは修正する。makeを入れるなど。余計なものはgitに入れないようにする。
-(
-	cd ./go
-	make
-)
+```
+./isucon.sh install
+```
 
 * public folderも追加する
+```
 ./isucon.sh add isubata.golang.service /home/isucon/isubata/webapp/public ./public
+```
+引数はそれぞれ関係するサービス名, コピー元, コピー先
 
 * 必要なものをインストール
-./install.sh  # pv, dstat, git, alp, myprofiler
+```
+./tools/install.sh
+```
 
 * /home/isucon/env.shなどを参照してDB_HOST, DB_USER, DB_PASSWORDを確認して.my.cnfに書き込む。
+```
 DB=$(sed -n 's/^database=//p' ~/.my.cnf)
+```
 
 * データベースのバックアップ及び情報の確認
+
 ./isucon.sh mysql  # => schema.sqlが作成される
 git add schema.sql && git commit -m "add schema.sql" && git push
 mysqldump --single-transaction $DB | gzip >dump.sql.gz    # HOW TO RESTORE: zcat dump.sql.gz | pv | mysql
 
 * initializeですべてを呼ぶ & start logger
-# see https://godoc.org/bitbucket.org/tailed/golang/rpccluster
-# app.go
+
+See https://godoc.org/bitbucket.org/tailed/golang/rpccluster
+
+```
 import "bitbucket.org/tailed/golang/rpccluster"
 var cluster *rpccluster.Cluster = rpccluster.NewCluster(20000, "app1:20000", "app2:20000", "app3:20000")
 func init() {
@@ -221,14 +235,19 @@ func getInitialize(c echo.Context) error {
 func InitializeMain(logid string) {
     StartLogger(logid)
 }
+```
 
 * /etc/nginx/sites-enabled/nginx.confにloggerアクセスを追加
+```
 location /adminlog/ {
 	alias /home/.../isucon/log/;
 	autoindex on;
 }
+```
 
 * import "text/template"を書き換え
+```
 import "bitbucket.org/tailed/template"
+```
 
 
