@@ -7,20 +7,20 @@ git clone git@github.com:atetubou/isucon11q.git
 ```
 
 # Memo
-* systemdについて
+## systemdについて
 https://qiita.com/tukiyo3/items/092fc32318bd3d1a0846
 
-* サービスの確認
+## サービスの確認
 ```
 sudo systemctl list-units --type=service
 ```
 
-* サービスの場所
+## サービスの場所
 ```
 /etc/systemd/system/*.service
 ```
 
-* ログ表示
+## ログ表示
 ```
 sudo journalctl
 sudo journalctl -u isuda.perl
@@ -28,11 +28,16 @@ sudo journalctl -u isuda.perl
 
 
 ## MySQLについて
-* schemaを得る
+schemaを得る
 
 ```
 mysqldump dbname --no-data | less
 ```
+or
+```
+./isucon.sh mysql
+```
+
 
 
 ## slow queryの解析
@@ -137,24 +142,22 @@ mysqlのmax_connectionも大きくしておくべき
 max_connections        = 1000
 ```
 
-
-
-## TODO
-* logger (per handler)
-* visualizer
-* TopList (which keeps SELECT * FROM ORDER BY somekey LIMIT 10)
+golangのhttpの設定。APIコールをしているときに特に有効。
+```
+http.DefaultTransport.(*http.Transport).MaxIdleConnsPerHost = 100
+```
 
 
 
 
 # 初動など
 
-* コンテスト前
+## コンテスト前
 
 ~/ssh/known_hostsをクリア
 gitレポジトリの作成
 
-* 各サーバのエイリアスを追加
+## 各サーバのエイリアスを追加
 
 ```
 sudo tee -a /etc/hosts <<EOF
@@ -166,19 +169,19 @@ sudo tee /etc/hostname <<< app1
 ```
 
 
-* 各サーバに鍵を配送
+## 各サーバに鍵を配送
 
 ```
 ./ssh/distribute.sh PASSWORD app{1,2,3}
 ```
 
-* tmuxを複数ウィンドウで開く
+## tmuxを複数ウィンドウで開く
 
 ```
 xpanes -c "ssh {}" app{1,2,3}
 ```
 
-* サーバにgitを配置して初期化
+## サーバにgitを配置して初期化
 
 ```
 git clone $REPOSITORY_URL
@@ -189,29 +192,29 @@ git commit -a
 git push
 ```
 
-* logger.sh, logger.goを配置
+## logger.sh, logger.goを配置
 
 ```
 ./isucon.sh install
 ```
 
-* public folderも追加する
+## public folderも追加する
 ```
 ./isucon.sh add isubata.golang.service /home/isucon/isubata/webapp/public ./public
 ```
 引数はそれぞれ関係するサービス名, コピー元, コピー先
 
-* 必要なものをインストール
+## 必要なものをインストール
 ```
 ./tools/install.sh
 ```
 
-* /home/isucon/env.shなどを参照してDB_HOST, DB_USER, DB_PASSWORDを確認して.my.cnfに書き込む。
+## /home/isucon/env.shなどを参照してDB_HOST, DB_USER, DB_PASSWORDを確認して.my.cnfに書き込む。
 ```
 DB=$(sed -n 's/^database=//p' ~/.my.cnf)
 ```
 
-* データベースのバックアップ及び情報の確認
+## データベースのバックアップ及び情報の確認
 
 ```
 ./isucon.sh mysql  # => schema.sqlが作成される
@@ -224,14 +227,16 @@ mysqldump --single-transaction $DB | gzip >/tmp/dump.sql.gz
 zcat /tmp/dump.sql.gz | pv | mysql
 ```
 
-* initializeでloggerを開始させる
+## initializeでloggerを開始させる
 
 以下をfunc init() {}などに追加。（詳しくは./tools/logger.goを参照)
 ```
 StartLogger(GetNextLogID())
 ```
 
-* rpccluster
+# そのほか
+
+## rpccluster
 See https://godoc.org/bitbucket.org/tailed/golang/rpccluster
 
 ```
@@ -250,7 +255,7 @@ func InitializeMain(logid string) {
 }
 ```
 
-* /etc/nginx/sites-enabled/nginx.confにloggerアクセスを追加
+## /etc/nginx/sites-enabled/nginx.confにloggerアクセスを追加
 ```
 location /adminlog/ {
 	alias /home/.../isucon/log/;
@@ -258,9 +263,20 @@ location /adminlog/ {
 }
 ```
 
-* import "text/template"を書き換え
+## import "text/template"を書き換え
 ```
 import "bitbucket.org/tailed/template"
+```
+
+
+## logviewer
+ログを解析してくれる。
+デフォルトでは8080でlistenしてログを表示する。
+cpu.prof, trace.profなどのファイルがきたときには適切にgo tool pprofやgo tool traceを使ってインタラクティブに表示する。
+```
+cd ./logviewer
+make
+sudo make install
 ```
 
 
