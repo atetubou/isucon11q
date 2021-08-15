@@ -162,7 +162,7 @@ sudo tee -a /etc/hosts <<EOF
 192.168.33.12 app2 app2
 192.168.33.13 app3 app3
 EOF
-sudo tee /etc/hostname < app1
+sudo tee /etc/hostname <<< app1
 ```
 
 
@@ -213,12 +213,25 @@ DB=$(sed -n 's/^database=//p' ~/.my.cnf)
 
 * データベースのバックアップ及び情報の確認
 
+```
 ./isucon.sh mysql  # => schema.sqlが作成される
 git add schema.sql && git commit -m "add schema.sql" && git push
-mysqldump --single-transaction $DB | gzip >dump.sql.gz    # HOW TO RESTORE: zcat dump.sql.gz | pv | mysql
+mysqldump --single-transaction $DB | gzip >/tmp/dump.sql.gz
+```
 
-* initializeですべてを呼ぶ & start logger
+データベースの復元方法:
+```
+zcat /tmp/dump.sql.gz | pv | mysql
+```
 
+* initializeでloggerを開始させる
+
+以下をfunc init() {}などに追加。（詳しくは./tools/logger.goを参照)
+```
+StartLogger(GetNextLogID())
+```
+
+* rpccluster
 See https://godoc.org/bitbucket.org/tailed/golang/rpccluster
 
 ```
