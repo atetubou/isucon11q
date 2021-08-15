@@ -33,7 +33,7 @@ fi
 
 info "Execute benchmark"
 # curl ...
-ssh isucon@app1 -t 'cd ~/isuumo/bench/ && ./bench' &
+ssh -T isucon@app1 'cd ~/isuumo/bench/ && ./bench' &
 for h in $HOSTS
 do
 	grep -m 1 "Successfully stopped logging" <(ssh -T $h 'journalctl -f -n 0 2>&1')
