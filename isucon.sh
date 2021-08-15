@@ -314,6 +314,7 @@ show_help_and_exit() {
 	echo "       $0 add SERVICE FROM TO    copy TARGET to pwd and append update script to init.sh" >&2
 	echo "                                 associated with SERVICE" >&2
 	echo "       $0 install                copy *.sh to /usr/bin" >&2
+	echo "       $0 ulimit                 extend ulimits" >&2
 	echo "       $0 mysql                  show mysql information" >&2
 	echo "Example:" >&2
 	echo "$0 init " >&2
@@ -326,6 +327,17 @@ install_main() {
 	sudo ln -sr ./isucon.sh /usr/bin
 	sudo ln -sr ./init.sh /usr/bin
 }
+
+extend_ulimit() {
+	info "Appending the following to /etc/security/limits.conf"
+	sudo tee -a /etc/security/limits.conf <<EOT
+* hard nofile 65535
+* soft nofile 65535
+EOT
+	info "Please reboot."
+}
+
+
 
 main() {
 	# precheck requirements
@@ -352,6 +364,9 @@ main() {
 			;;
 		install)
 			install_main $@
+			;;
+		ulimit)
+			extend_ulimit $@
 			;;
 
 		help | -h | --help)
