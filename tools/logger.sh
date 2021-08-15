@@ -108,16 +108,14 @@ maximum_of() {
 }
 get_last_dir() {
 	# find the last directory (i.e. with a name of the largest number)
-	maximum_of $(find $LOG_DIR -maxdepth 1 -type d | sed -n -e  's@^.*/\([0-9][0-9]*\)@\1@p')
+	maximum_of $(find $LOG_DIR -maxdepth 1 -type d | grep -o -E '[0-9]+$')
 }
 next_id() {
 	last_id=$(get_last_dir)
 	last_id=$((last_id + 1))
-	printf '%04d' $last_id
-}
-last_id() {
-	last_id=$(get_last_dir)
-	printf '%04d' $last_id
+	branch=$(git branch --show-current 2>/dev/null || true)
+	[ -n "$branch" ] && branch="$branch-"
+	echo $branch$(printf '%04d' $last_id)
 }
 
 start_logging() {
@@ -146,6 +144,8 @@ record_git_information() {
 	CURRENT_COMMIT=$(git rev-parse HEAD)
 	FILENAME=$(log_file_name_of git txt)
 	date >>$FILENAME
+
+	echo "Branch: $(git branch --show-current 2>/dev/null)" >>$FILENAME
 	echo "git diff $CURRENT_COMMIT" >>$FILENAME
 	git diff $CURRENT_COMMIT >>$FILENAME 2>&1
 }
@@ -181,7 +181,7 @@ stop_logging() {
 	then
 		LOG_DIR="$LOG_DIR/$1"
 	else
-		LOG_DIR="$LOG_DIR/$(last_id)"
+		error "Please specify ID"
 	fi
 	if [ ! -d $LOG_DIR ]
 	then
@@ -232,9 +232,6 @@ main() {
 			;;
 		nextid)
 			next_id $@
-			;;
-		lastid)
-			last_id $@
 			;;
 		term)
 			terminate_logging $@
