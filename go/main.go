@@ -242,7 +242,7 @@ func init() {
 
 func TraceMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		defer trace.StartRegion(c.Request().Context(), c.Path()).End()
+		defer trace.StartRegion(c.Request().Context(), c.Request().Method + ": " + c.Path()).End()
 		return next(c)
 	}
 }
