@@ -143,7 +143,7 @@ record_git_information() {
 	fi
 	CURRENT_COMMIT=$(git rev-parse HEAD)
 	FILENAME=$(log_file_name_of git txt)
-	date >>$FILENAME
+	date +"%Y-%m-%d %H:%M:%S" >>$FILENAME # This date information will be also used by record_journalctl
 
 	echo "Branch: $(git branch --show-current 2>/dev/null)" >>$FILENAME
 	echo "git diff $CURRENT_COMMIT" >>$FILENAME
@@ -192,7 +192,14 @@ stop_logging() {
 	record_nginx_log || warn "failed to record nginx log"
 	stop_dstat || warn "failed to stop dstat"
 	record_cpuprof || warn "failed to copy cpu profile"
+	record_journalctl || warn "failed to record journalctl"
 	echo "Successfully stopped logging.  (Working directory: $LOG_DIR)"
+}
+
+record_journalctl() {
+	filename=$(log_file_name_of journalctl txt)
+	gitfilename=$(log_file_name_of git txt)
+	journalctl -S "$(head -1 $gitfilename)" >$filename
 }
 
 terminate_logging() {
