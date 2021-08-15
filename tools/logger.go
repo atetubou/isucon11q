@@ -14,6 +14,18 @@ For example, in order to add it to every handler of http, one can write a wrappe
 			h(a, b)
 		})
 	}
+If you are using echo, the following code works:
+	func TraceMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			defer trace.StartRegion(c.Request().Context(), c.Path()).End()
+			return next(c)
+		}
+	}
+	func main() {
+		e := echo.New()
+		// ...
+		e.Use(TraceMiddleware)
+	}
 */
 package main
 
