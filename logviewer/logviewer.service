@@ -2,12 +2,12 @@
 Description=log viewer
 
 [Service]
-WorkingDirectory=/home/vagrant/log
-PIDFile=/home/vagrant/log/log.pid
+WorkingDirectory=/home/isucon/log
+PIDFile=/home/isucon/log/log.pid
 
-User=vagrant
-Group=vagrant
-ExecStart=/home/vagrant/isucon11q/logviewer/logviewer
+User=isucon
+Group=isucon
+ExecStart=/usr/bin/logviewer
 ExecStop=/bin/kill -s QUIT $MAINPID
 
 Restart   = always
