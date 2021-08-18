@@ -26,6 +26,11 @@ sudo journalctl
 sudo journalctl -u isuda.perl
 ```
 
+## リスンしているプロセスの確認
+80番ポートでリスンしているプロセスの確認
+```
+sudo lsof -P -i :80
+```
 
 ## MySQLについて
 schemaを得る
