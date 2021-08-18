@@ -52,45 +52,8 @@ log_file_name_of() {
 
 start_dstat() {
 	logfile=$(log_file_name_of dstat)
-	pidfile="$logfile.pid"
-	if [ -f $pidfile ]
-	then
-		stop_dstat || true
-	fi
 	rm -f "$logfile"
-	DSTAT_MYSQL_USER=root DSTAT_MYSQL_PWD= script -q -c "stty cols 1000; TERM=xterm-256color dstat -t -c --top-cpu -d -n -m -s --top-mem --mysql5-cmds --mysql5-io --mysql5-keys" "$logfile" >/dev/null 2>&1 &
-	echo "$!" > $pidfile
-}
-stop_dstat() {
-	logfile=$(log_file_name_of dstat)
-	pidfile="$logfile.pid"
-	if [ ! -f $pidfile ]
-	then
-		return 1
-	fi
-	pid=$(cat $pidfile)
-	rm -f $pidfile
-	kill -KILL $pid
-	if [ $? -ne 0 ]
-	then
-		return 1
-	fi
-	# add shebang
-	retried=0
-	while kill -0 $pid >/dev/null 2>&1
-	do
-		echo "Waiting for stopping process $pid..."
-		sleep 1
-		retried=$((retried+1))
-		if [ $retried -ge 10 ]
-		then
-			kill -TERM $pid
-			break
-		fi
-	done
-	cat <(echo '#!/usr/bin/less -SR') "$logfile" | dd conv=notrunc of="$logfile" 2>/dev/null # add shebang to view logfile
-	chmod 755 "$logfile"
-	return $?
+	DSTAT_MYSQL_USER=root DSTAT_MYSQL_PWD= script -q -c "stty cols 1000; TERM=xterm-256color timeout 60 dstat -t -c --top-cpu -d -n -m -s --top-mem --mysql5-cmds --mysql5-io --mysql5-keys" "$logfile" >/dev/null 2>&1 &
 }
 
 maximum_of() {
@@ -190,7 +153,6 @@ stop_logging() {
 
 	record_mysql_log || warn "failed to record mysql log"
 	record_nginx_log || warn "failed to record nginx log"
-	stop_dstat || warn "failed to stop dstat"
 	record_cpuprof || warn "failed to copy cpu profile"
 	record_journalctl || warn "failed to record journalctl"
 	echo "Successfully stopped logging.  (Working directory: $LOG_DIR)"
@@ -214,7 +176,6 @@ terminate_logging() {
 		error "Could not find working directory: $LOG_DIR  (Did you started logging?)"
 	fi
 
-	stop_dstat || warn "failed to stop dstat"
 	rm -r $LOG_DIR || error "Could not remove directory: $LOG_DIR"
 	echo "Successfully terminated logging.  (Working directory: $LOG_DIR)"
 }
