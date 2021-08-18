@@ -20,6 +20,7 @@ install_go() {
         fi
 	(
 		cd /tmp
+		rm -rf ./update-golang
 		git clone https://github.com/udhos/update-golang
 		cd update-golang
 		sudo ./update-golang.sh
@@ -54,7 +55,7 @@ install_myprofiler() {
 
 echo "# Install several tools by apt"
 sudo DEBIAN_FRONTEND=noninteractive apt update -y
-sudo DEBIAN_FRONTEND=noninteractive apt install -y git pv dstat unzip graphviz
+sudo DEBIAN_FRONTEND=noninteractive apt install -y git pv dstat unzip graphviz python3-mysqldb percona-toolkit
 
 install_alp
 install_myprofiler
