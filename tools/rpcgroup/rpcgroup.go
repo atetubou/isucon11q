@@ -13,10 +13,9 @@ package rpcgroup
 
 import (
 	"fmt"
+	"log"
 	"sync"
 )
-
-const RPCBanner string = "rpcgroup"
 
 type Group struct {
 	MyHost      string
@@ -35,6 +34,17 @@ func New(listenPort int, hosts ...string) *Group {
 	for _, host := range hosts {
 		c.connections = append(c.connections, NewClient(host))
 	}
+	log_output := ""
+	for i, host := range hosts {
+		if i > 0 {
+			log_output += ", "
+		}
+		log_output += host
+		if host == c.MyHost {
+			log_output += " (myself)"
+		}
+	}
+	log.Println("rpcgroup connected to ", log_output)
 	return c
 }
 

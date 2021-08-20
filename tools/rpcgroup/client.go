@@ -39,6 +39,8 @@ func (c *Client) Connect() {
 			if strings.Contains(err.Error(), "connection refused") {
 				log.Println("connection refused: ", err)
 				time.Sleep(1 * time.Second)
+			} else {
+				log.Println("rpcgroup: unknown error: ", err)
 			}
 			if retry == 0 {
 				log.Fatal("DialHTTP failed: ", err)
@@ -70,5 +72,9 @@ func (c *Client) Call(name string, params ...interface{}) []interface{} {
 		Channel: channel,
 	}
 	callResponse := <-channel
+	if callResponse.Error != nil {
+		log.Fatal("rpc error:", callResponse.Error)
+	}
+
 	return *callResponse.Reply.(*[]interface{})
 }

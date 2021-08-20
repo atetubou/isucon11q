@@ -152,5 +152,6 @@ func main() {
 	flag.Parse()
 
 	http.Handle("/", LogHandler{*root})
+	log.Println("Serving at port", *port)
 	log.Fatal(http.ListenAndServe(":"+*port, nil))
 }
