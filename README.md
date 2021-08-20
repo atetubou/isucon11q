@@ -284,4 +284,8 @@ make
 sudo make install
 ```
 
+## deepcopy
+Goのコピーはshallowコピーなので、構造体をコピーするときは注意する必要がある。
+
+[deep-copy](https://github.com/globusdigital/deep-copy)
 

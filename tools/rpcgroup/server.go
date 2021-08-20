@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"net/rpc"
 	"os"
-	"time"
 )
 
 // Hostname returns host name or "" if there is an error
@@ -19,20 +18,10 @@ func Hostname() string {
 	return hostname
 }
 
-func generateUniqueID() string {
-	return fmt.Sprintf("%s:%d:%s", RPCBanner, time.Now().UnixNano(), Hostname())
-}
-
-var UniqueID = generateUniqueID()
-
-func GetUniqueID() string {
-	return UniqueID
-}
 func init() {
 	dummy := new(Dummy)
 	rpc.Register(dummy)
 	rpc.HandleHTTP()
-	Register(GetUniqueID)
 }
 
 func Listen(listenPort int) {
