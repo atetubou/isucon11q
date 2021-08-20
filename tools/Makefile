@@ -8,7 +8,7 @@ PTQUERYDIGEST_TARGETS = $(addsuffix /_all.ptquerydigest.txt, $(TARGET_DIRS))
 SUMMARY_TARGETS = $(addsuffix /__all.txt, $(TARGET_DIRS))
 
 TARGETS = $(DSTAT_TARGETS) $(NGINX_TARGETS) $(JOURNALCTL_TARGETS) $(MYSQL_TARGETS) $(PTQUERYDIGEST_TARGETS) $(SUMMARY_TARGETS)
-SUMMARIES = .dstat.txt .mysqldumpslow.txt .ptquerydigest.txt .nginxalp.txt .journalctl.txt
+SUMMARIES = .dstat.txt .ptquerydigest.txt .mysqldumpslow.txt .nginxalp.txt .journalctl.txt
 
 .PHONY: all clean
 
@@ -35,7 +35,9 @@ endef
 	$(concat)
 
 ./log/%/_all.ptquerydigest.txt: $$(wildcard ./log/%/[!_]*.mysql-slow.log)
+	echo "########## ptquerydigest ##########" >> $@;
 	for i in $^; do echo "########## $$i ##########" >> $@; pt-query-digest $$i >> $@; echo >>$@; echo >>$@; done
+
 ./log/%/__all.txt: $$(addprefix ./log/%/_all, $(SUMMARIES))
 	cat $^ >> $@ || true # ignore error
 

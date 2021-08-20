@@ -24,6 +24,7 @@ set enc=utf-8
 set fenc=utf-8
 set fileencodings=utf-8,sjis,euc-jp
 set hidden
+set background=dark
 
 
 " 改行コードの自動認識
@@ -37,4 +38,5 @@ endif
 nmap <C-H> :tabprevious<CR>
 nmap <C-L> :tabnext<CR>
 nmap <C-T> :tabnew<CR>
+
 
