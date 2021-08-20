@@ -12,39 +12,54 @@ Example:
 package rpcgroup
 
 import (
+	"fmt"
+	"log"
 	"sync"
 )
 
-const RPCBanner string = "rpcgroup"
-
 type Group struct {
+	MyHost      string
 	connections []*Client
 }
 
 // New is a constructor of Group.
 // hosts must be specified by the "host:port" form.
 func New(listenPort int, hosts ...string) *Group {
-	c := new(Group)
-	c.connections = []*Client{}
+	c := &Group{
+		MyHost:      fmt.Sprintf("%s:%d", Hostname(), listenPort),
+		connections: []*Client{},
+	}
 	Listen(listenPort)
 
 	for _, host := range hosts {
 		c.connections = append(c.connections, NewClient(host))
 	}
+	log_output := ""
+	for i, host := range hosts {
+		if i > 0 {
+			log_output += ", "
+		}
+		log_output += host
+		if host == c.MyHost {
+			log_output += " (myself)"
+		}
+	}
+	log.Println("rpcgroup connected to ", log_output)
 	return c
 }
 
 // GroupWithoutListen is a constructor of Group that does not listen any port.
 // It groups together all the hosts.
 func GroupWithoutListen(hosts ...string) *Group {
-	c := new(Group)
-	c.connections = []*Client{}
+	c := &Group{
+		MyHost:      "",
+		connections: []*Client{},
+	}
 	for _, host := range hosts {
 		c.connections = append(c.connections, NewClient(host))
 	}
 	return c
 }
-
 
 // Client returns the id'th client (0-indexed)
 func (c *Group) Client(id int) *Client {
@@ -62,7 +77,12 @@ func (c *Group) call(name string, params ...interface{}) [][]interface{} {
 	for id, client := range c.connections {
 		wg.Add(1)
 		go func(id int, client *Client) {
-			results[id] = client.Call(name, params...)
+			if client.TargetHost == c.MyHost {
+				// If the destination is the same host, do not use RPC; instead, just call the function.
+				Call(name, params...)
+			} else {
+				results[id] = client.Call(name, params...)
+			}
 			wg.Done()
 		}(id, client)
 	}

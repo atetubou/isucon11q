@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"bytes"
 	"flag"
 	"fmt"
@@ -105,19 +106,28 @@ func (h LogHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		defer f.Close()
-
-		cmd := exec.Command("aha")
-		stdin, _ := cmd.StdinPipe()
-		if err != nil {
-			log.Fatal(err)
-		}
 		content, err := io.ReadAll(f)
 		if err != nil {
 			log.Fatal(err)
 		}
-		io.WriteString(stdin, string(content))
-		stdin.Close()
-		out, _ := cmd.Output()
+
+		cmd := exec.Command("aha")
+		stdin, err := cmd.StdinPipe()
+		if err != nil {
+			log.Fatal(err)
+		}
+		go func() {
+			writer := bufio.NewWriter(stdin)
+			_, err = writer.Write(content)
+			if err != nil {
+				log.Fatal(err)
+			}
+			stdin.Close()
+		}()
+		out, err := cmd.Output()
+		if err != nil {
+			log.Fatal(err)
+		}
 		fmt.Fprint(w, string(out))
 	} else {
 		http.ServeFile(w, r, filepath)
@@ -152,5 +162,6 @@ func main() {
 	flag.Parse()
 
 	http.Handle("/", LogHandler{*root})
+	log.Println("Serving at port", *port)
 	log.Fatal(http.ListenAndServe(":"+*port, nil))
 }

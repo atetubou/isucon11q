@@ -59,8 +59,10 @@ func ExecuteCommand(bashscript string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	stdin.Write([]byte(bashscript))
-	stdin.Close()
+	go func() {
+		stdin.Write([]byte(bashscript))
+		stdin.Close()
+	}()
 	stdoutStderr, err := cmd.CombinedOutput()
 	if err != nil {
 		return string(stdoutStderr), err

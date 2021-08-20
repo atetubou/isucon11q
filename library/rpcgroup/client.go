@@ -8,17 +8,20 @@ import (
 )
 
 type Client struct {
-	rpc_client     *rpc.Client
-	host_port_pair string
+	// The connection destination.  e.g., "localhost:5000"
+	TargetHost string
+
 	// The number of times that try to reconnect.  if this is negative, retry connection forever.
 	RetryCount int64
+
+	rpc_client *rpc.Client
 
 	callChannel chan *FunctionCallRequest
 }
 
-func NewClient(host_port_pair string) *Client {
+func NewClient(TargetHost string) *Client {
 	c := new(Client)
-	c.host_port_pair = host_port_pair
+	c.TargetHost = TargetHost
 	c.RetryCount = -1
 	c.callChannel = make(chan *FunctionCallRequest, 1000)
 	go func() {
@@ -28,15 +31,16 @@ func NewClient(host_port_pair string) *Client {
 }
 
 // Connect connects to the server if the connection is not established yet.
-// Example: host_port_pair = "localhost:12345"
 func (c *Client) Connect() {
 	retry := c.RetryCount
 	for c.rpc_client == nil {
-		client, err := rpc.DialHTTP("tcp", c.host_port_pair)
+		client, err := rpc.DialHTTP("tcp", c.TargetHost)
 		if err != nil {
 			if strings.Contains(err.Error(), "connection refused") {
 				log.Println("connection refused: ", err)
 				time.Sleep(1 * time.Second)
+			} else {
+				log.Println("rpcgroup: unknown error: ", err)
 			}
 			if retry == 0 {
 				log.Fatal("DialHTTP failed: ", err)
@@ -68,5 +72,9 @@ func (c *Client) Call(name string, params ...interface{}) []interface{} {
 		Channel: channel,
 	}
 	callResponse := <-channel
+	if callResponse.Error != nil {
+		log.Fatal("rpc error:", callResponse.Error)
+	}
+
 	return *callResponse.Reply.(*[]interface{})
 }

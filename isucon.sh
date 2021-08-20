@@ -292,8 +292,9 @@ add_main() {
 
 mysql_main() {
 	(
+		mkdir -p ./info
 		DB=$(mysql -N <<<'SELECT DATABASE();')
-		TARGET="schema.sql"
+		TARGET="./info/schema.sql"
 		if [ "$DB" = "NULL" ]
 		then
 			echo "Choose database:"
@@ -316,6 +317,7 @@ show_help_and_exit() {
 	echo "       $0 install                copy *.sh to /usr/bin" >&2
 	echo "       $0 ulimit                 extend ulimits" >&2
 	echo "       $0 mysql                  show mysql information" >&2
+	echo "       $0 info                   put pt-summary in ./info" >&2
 	echo "Example:" >&2
 	echo "$0 init " >&2
 	echo "$0 add isubata.golang.service /home/isucon/isubata/webapp/public ./public " >&2
@@ -337,6 +339,12 @@ EOT
 	info "Please reboot."
 }
 
+
+info_main() {
+	mkdir -p ./info
+	pt-summary > ./info/$(hostname).pt-summary.txt
+	pt-mysql-summary > ./info/$(hostname).pt-mysql-summary.txt
+}
 
 
 main() {
@@ -368,7 +376,9 @@ main() {
 		ulimit)
 			extend_ulimit $@
 			;;
-
+		info)
+			info_main
+			;;
 		help | -h | --help)
 			show_help_and_exit
 			;;
