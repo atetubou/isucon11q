@@ -265,7 +265,7 @@ func main() {
 		return
 	}
 
-	initializeImage()
+	//initializeImage()
 	initializeCache()
 
 	serverPort := fmt.Sprintf(":%v", getEnv("SERVER_APP_PORT", "3000"))
@@ -357,7 +357,7 @@ func postInitialize(c echo.Context) error {
 var group = rpcgroup.New(12345, "app1:12345", "app2:12345", "app3:12345")
 var appgroup = rpcgroup.New(12340, "app1:12340", "app2:12340")
 var InitializeFunction = rpcgroup.Register(func(id string) {
-	initializeImage()
+	//initializeImage()
 	initializeCache()
 	StartLogger(id)
 })
@@ -773,6 +773,7 @@ func getIsuID(c echo.Context) error {
 	return c.JSON(http.StatusOK, res)
 }
 
+/*
 var icon_dir = "/home/isucon/webapp/public/icon/"
 
 func initializeImage() {
@@ -788,6 +789,7 @@ func initializeImage() {
 		rpcgroup.Call(WriteImage, isu.Image, isu.JIAIsuUUID, isu.JIAUserID)
 	}
 }
+*/
 
 // GET /api/isu/:jia_isu_uuid/icon
 // ISUのアイコンを取得
