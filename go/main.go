@@ -354,11 +354,12 @@ func postInitialize(c echo.Context) error {
 
 var group = rpcgroup.New(12345, "app1:12345", "app2:12345", "app3:12345")
 var InitializeFunction = rpcgroup.Register(func(id string) {
+	initializeImage()
 	StartLogger(id)
 })
 
 var WriteImage = rpcgroup.Register(func(image []byte, jiaIsuUUID, jiaUserID string) {
-	filename := "/home/isucon/webapp/public/" + jiaIsuUUID + "_" + jiaUserID
+	filename := "/home/isucon/webapp/public/icon/" + jiaIsuUUID + "_" + jiaUserID
 	err := ioutil.WriteFile(filename, image, 0644)
 	if err != nil {
 		log.Fatal(err)
@@ -744,7 +745,7 @@ func getIsuIcon(c echo.Context) error {
 
 	jiaIsuUUID := c.Param("jia_isu_uuid")
 
-	filename := "/home/isucon/webapp/public/" + jiaIsuUUID + "_" + jiaUserID
+	filename := "/home/isucon/webapp/public/icon/" + jiaIsuUUID + "_" + jiaUserID
 	image, err := ioutil.ReadFile(filename)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
