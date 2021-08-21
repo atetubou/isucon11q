@@ -331,6 +331,9 @@ func postInitialize(c echo.Context) error {
 		return c.NoContent(http.StatusInternalServerError)
 	}
 
+	logid := GetNextLogID()
+	StartLogger(logid)
+
 	return c.JSON(http.StatusOK, InitializeResponse{
 		Language: "go",
 	})
