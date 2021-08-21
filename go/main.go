@@ -7,8 +7,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"hash/maphash"
 	"io/ioutil"
-	"math/rand"
 	"net/http"
 	"os"
 	"os/exec"
@@ -1313,15 +1313,18 @@ func getTrend(c echo.Context) error {
 // POST /api/condition/:jia_isu_uuid
 // ISUからのコンディションを受け取る
 func postIsuCondition(c echo.Context) error {
-	// TODO: 一定割合リクエストを落としてしのぐようにしたが、本来は全量さばけるようにすべき
-	dropProbability := 0.0
-	if rand.Float64() <= dropProbability {
-		return c.NoContent(http.StatusAccepted)
-	}
-
 	jiaIsuUUID := c.Param("jia_isu_uuid")
 	if jiaIsuUUID == "" {
 		return c.String(http.StatusBadRequest, "missing: jia_isu_uuid")
+	}
+
+	var h maphash.Hash
+	h.WriteString(jiaIsuUUID)
+
+	// TODO: 一定割合リクエストを落としてしのぐようにしたが、本来は全量さばけるようにすべき
+	dropProbability := 90
+	if h.Sum64()%100 < uint64(dropProbability) {
+		return c.NoContent(http.StatusAccepted)
 	}
 
 	req := []PostIsuConditionRequest{}
