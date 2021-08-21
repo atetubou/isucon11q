@@ -723,8 +723,8 @@ func getIsuID(c echo.Context) error {
 var icon_dir = "/home/isucon/webapp/public/icon/"
 
 func initializeImage() {
-	os.RemoveAll(icon_dir)
-	os.MkdirAll(icon_dir, 0777)
+	MustExecuteCommand("rm -rf " + icon_dir)
+	MustExecuteCommand("mkdir -p /home/isucon/webapp/public/icon")
 	isuList := []Isu{}
 	err := db.Select(
 		&isuList,
