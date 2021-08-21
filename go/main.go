@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"hash/fnv"
 	"io/ioutil"
+	"math/rand"
 	"net/http"
 	"os"
 	"os/exec"
@@ -1323,7 +1324,7 @@ func postIsuCondition(c echo.Context) error {
 
 	// TODO: 一定割合リクエストを落としてしのぐようにしたが、本来は全量さばけるようにすべき
 	dropProbability := 70
-	if h.Sum64()%100 < uint64(dropProbability) {
+	if h.Sum64()%100 < uint64(dropProbability) && rand.Float64() < 0.9 {
 		return c.NoContent(http.StatusAccepted)
 	}
 
