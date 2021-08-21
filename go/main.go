@@ -358,7 +358,7 @@ var appgroup = rpcgroup.New(12340, "app1:12340", "app2:12340")
 var InitializeFunction = rpcgroup.Register(func(id string) {
 	//initializeImage()
 	initializeCache()
-	StartLogger(id)
+	// StartLogger(id)
 })
 
 var cacheIsu sync.Map
