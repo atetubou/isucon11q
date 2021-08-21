@@ -1,6 +1,6 @@
 DEPEND = $(shell find . -name '*.go')
-all: isucari
+all: isucondition
 
-isucari: $(DEPEND)
-	go build -o isucari
+isucondition: $(DEPEND)
+	go build -o isucondition
 
