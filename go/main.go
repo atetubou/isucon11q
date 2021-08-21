@@ -16,6 +16,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
@@ -265,6 +266,7 @@ func main() {
 	}
 
 	initializeImage()
+	initializeCache()
 
 	serverPort := fmt.Sprintf(":%v", getEnv("SERVER_APP_PORT", "3000"))
 	e.Logger.Fatal(e.Start(serverPort))
@@ -356,7 +358,57 @@ var group = rpcgroup.New(12345, "app1:12345", "app2:12345", "app3:12345")
 var appgroup = rpcgroup.New(12340, "app1:12340", "app2:12340")
 var InitializeFunction = rpcgroup.Register(func(id string) {
 	initializeImage()
+	initializeCache()
 	StartLogger(id)
+})
+
+var cacheIsu sync.Map
+
+type IsuUserIDPair struct {
+	JIAIsuUUID string
+	JIAUserID  string
+}
+
+/*
+// Load generates a deep copy of Isu
+func (o Isu) Load() interface{} {
+	var cp Isu = o
+	if o.Image != nil {
+		cp.Image = make([]byte, len(o.Image))
+		copy(cp.Image, o.Image)
+	}
+	return cp
+}
+*/
+
+func initializeCache() {
+	cacheIsu = sync.Map{}
+
+	isuList := []Isu{}
+	err := db.Select(&isuList, "SELECT * FROM `isu`")
+	if err != nil {
+		log.Fatal("db erro", err)
+	}
+
+	for _, isu := range isuList {
+		key := IsuUserIDPair{
+			JIAIsuUUID: isu.JIAIsuUUID,
+			JIAUserID:  isu.JIAUserID,
+		}
+		isu_copied := isu
+		cacheIsu.Store(key, &isu_copied)
+	}
+}
+func init() {
+	rpcgroup.GobRegister(Isu{})
+}
+
+var InsertIsu = rpcgroup.Register(func(isu Isu) {
+	key := IsuUserIDPair{
+		JIAIsuUUID: isu.JIAIsuUUID,
+		JIAUserID:  isu.JIAUserID,
+	}
+	cacheIsu.Store(key, &isu)
 })
 
 var WriteImage = rpcgroup.Register(func(image []byte, jiaIsuUUID, jiaUserID string) {
@@ -608,7 +660,6 @@ func postIsu(c echo.Context) error {
 	defer tx.Rollback()
 
 	//group.Client(0).Call(WriteImage, image, jiaIsuUUID, jiaUserID)
-	appgroup.Call(WriteImage, image, jiaIsuUUID, jiaUserID)
 
 	_, err = tx.Exec("INSERT INTO `isu`"+
 		"	(`jia_isu_uuid`, `name`, `image`, `jia_user_id`) VALUES (?, ?, ?, ?)",
@@ -686,6 +737,9 @@ func postIsu(c echo.Context) error {
 		return c.NoContent(http.StatusInternalServerError)
 	}
 
+	appgroup.Call(InsertIsu, isu)
+	//appgroup.Call(WriteImage, image, jiaIsuUUID, jiaUserID)
+
 	return c.JSON(http.StatusCreated, isu)
 }
 
@@ -750,13 +804,27 @@ func getIsuIcon(c echo.Context) error {
 
 	jiaIsuUUID := c.Param("jia_isu_uuid")
 
-	filename := "/home/isucon/webapp/public/icon/" + jiaIsuUUID + "_" + jiaUserID
-	image, err := ioutil.ReadFile(filename)
-	if err != nil {
-		return c.String(http.StatusNotFound, "not found: isu")
+	key := IsuUserIDPair{
+		JIAIsuUUID: jiaIsuUUID,
+		JIAUserID:  jiaUserID,
 	}
 
-	return c.Blob(http.StatusOK, "", image)
+	isu, ok := cacheIsu.Load(key)
+	if !ok {
+		return c.String(http.StatusNotFound, "not found: isu")
+	}
+	return c.Blob(http.StatusOK, "", isu.(Isu).Image)
+
+	/*
+		filename := "/home/isucon/webapp/public/icon/" + jiaIsuUUID + "_" + jiaUserID
+		image, err := ioutil.ReadFile(filename)
+		if err != nil {
+			return c.String(http.StatusNotFound, "not found: isu")
+		}
+
+		return c.Blob(http.StatusOK, "", image)
+
+	*/
 
 	/*
 
