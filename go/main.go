@@ -724,7 +724,7 @@ var icon_dir = "/home/isucon/webapp/public/icon/"
 
 func initializeImage() {
 	MustExecuteCommand("rm -rf " + icon_dir)
-	MustExecuteCommand("mkdir -p /home/isucon/webapp/public/icon")
+	MustExecuteCommand("mkdir -p " + icon_dir)
 	isuList := []Isu{}
 	err := db.Select(
 		&isuList,
@@ -754,6 +754,18 @@ func getIsuIcon(c echo.Context) error {
 
 	filename := "/home/isucon/webapp/public/icon/" + jiaIsuUUID + "_" + jiaUserID
 	image, err := ioutil.ReadFile(filename)
+
+	var image2 []byte
+	err2 := db.Get(&image2, "SELECT `image` FROM `isu` WHERE `jia_user_id` = ? AND `jia_isu_uuid` = ?", jiaUserID, jiaIsuUUID)
+	if err2 != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			if err == nil {
+				log.Fatal("failed!:", err, filename, err2)
+			}
+			return c.String(http.StatusNotFound, "not found: isu")
+		}
+	}
+
 	if err != nil {
 		return c.String(http.StatusNotFound, "not found: isu")
 	}
