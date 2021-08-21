@@ -264,6 +264,8 @@ func main() {
 		return
 	}
 
+	initializeImage()
+
 	serverPort := fmt.Sprintf(":%v", getEnv("SERVER_APP_PORT", "3000"))
 	e.Logger.Fatal(e.Start(serverPort))
 }
@@ -712,6 +714,19 @@ func getIsuID(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, res)
+}
+
+func initializeImage() {
+	isuList := []Isu{}
+	err := db.Select(
+		&isuList,
+		"SELECT * FROM `isu`")
+	if err != nil {
+		log.Fatal(err)
+	}
+	for _, isu := range isuList {
+		rpcgroup.Call(WriteImage, isu.Image, isu.JIAIsuUUID, isu.JIAUserID)
+	}
 }
 
 // GET /api/isu/:jia_isu_uuid/icon
