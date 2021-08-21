@@ -1143,11 +1143,17 @@ func getIsuConditionsFromDB(db *sqlx.DB, jiaIsuUUID string, endTime time.Time, c
 	var err error
 
 	if startTime.IsZero() {
+		keys := make([]string, 0, len(conditionLevel))
+		for k := range conditionLevel {
+			keys = append(keys, "'"+k+"'")
+		}
+
 		err = db.Select(&conditions,
 			"SELECT `timestamp`, `is_sitting`, `condition`, `message` FROM `isu_condition` WHERE `jia_isu_uuid` = ?"+
+				"   AND `condition` IN (?)"+
 				"	AND `timestamp` < ?"+
-				"	ORDER BY `timestamp` DESC",
-			jiaIsuUUID, endTime,
+				"	ORDER BY `timestamp` DESC LIMIT ?",
+			jiaIsuUUID, strings.Join(keys, ","), endTime, conditionLimit,
 		)
 	} else {
 		err = db.Select(&conditions,
