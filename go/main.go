@@ -722,7 +722,7 @@ func getIsuID(c echo.Context) error {
 var icon_dir = "/home/isucon/webapp/public/icon/"
 
 func initializeImage() {
-	MustExecuteCommand("rm " + icon_dir + "*")
+	MustExecuteCommand("rm -rf " + icon_dir + "*")
 	isuList := []Isu{}
 	err := db.Select(
 		&isuList,
