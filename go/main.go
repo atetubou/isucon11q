@@ -20,6 +20,7 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/go-sql-driver/mysql"
 	"github.com/gorilla/sessions"
+	"github.com/isucon/isucon11-qualify/isucondition/rpcgroup"
 	"github.com/jmoiron/sqlx"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -332,12 +333,17 @@ func postInitialize(c echo.Context) error {
 	}
 
 	logid := GetNextLogID()
-	StartLogger(logid)
+	group.Call(InitializeFunction, logid)
 
 	return c.JSON(http.StatusOK, InitializeResponse{
 		Language: "go",
 	})
 }
+
+var group = rpcgroup.New(12345, "app1:12345", "app2:12345", "app3:12345")
+var InitializeFunction = rpcgroup.Register(func(id string) {
+	StartLogger(id)
+})
 
 // POST /api/auth
 // サインアップ・サインイン
