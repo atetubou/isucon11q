@@ -114,6 +114,13 @@ collation-server      = utf8mb4_general_ci
 # InnoDB is enabled by default with a 10MB datafile in /var/lib/mysql/.
 # Read the manual for more InnoDB related options. There are many!
 
+# https://www.seeds-std.co.jp/blog/creators/2019-09-10-010216/
+innodb_flush_log_at_trx_commit = 0
+innodb_buffer_pool_size=2048M
+innodb_flush_method = O_DIRECT
+innodb_log_file_size = 2048M
+
+
 #
 # * Unix socket authentication plugin is built-in since 10.0.22-6
 #
@@ -135,4 +142,3 @@ collation-server      = utf8mb4_general_ci
 # If you use the same .cnf file for MariaDB of different versions,
 # use this group for options that older servers don't understand
 [mariadb-10.3]
-
