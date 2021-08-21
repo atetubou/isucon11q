@@ -396,17 +396,32 @@ func initializeCache() {
 	}
 
 	for _, isu := range isuList {
-		key := IsuUserIDPair{
-			JIAIsuUUID: isu.JIAIsuUUID,
-			JIAUserID:  isu.JIAUserID,
-		}
 		isu_copied := isu
-		cacheIsu.Store(key, &isu_copied)
-		cacheIsuFromUUID.Store(isu.JIAIsuUUID, &isu_copied)
+		rpcgroup.Call(InsertIsu, isu_copied)
+		/*
+			key := IsuUserIDPair{
+				JIAIsuUUID: isu.JIAIsuUUID,
+				JIAUserID:  isu.JIAUserID,
+			}
+			isu_copied := isu
+			rpcgroup.Call(InsertIsu, isu_copied)
+			cacheIsu.Store(key, &isu_copied)
+			cacheIsuFromUUID.Store(isu.JIAIsuUUID, &isu_copied)
+		*/
+	}
+
+	cacheIsuCondition = lockmap.LockMap{}
+	isuConditionList := []IsuCondition{}
+	if err := db.Select(&isuConditionList, "SELECT * FROM `isu_condition`"); err != nil {
+		log.Fatal("db erro", err)
+	}
+
+	for _, isu_con := range isuConditionList {
 	}
 }
 func init() {
 	rpcgroup.GobRegister(Isu{})
+	rpcgroup.GobRegister(IsuCondition{})
 }
 
 var InsertIsu = rpcgroup.Register(func(isu Isu) {
@@ -417,6 +432,10 @@ var InsertIsu = rpcgroup.Register(func(isu Isu) {
 	cacheIsu.Store(key, &isu)
 	cacheIsuFromUUID.Store(isu.JIAIsuUUID, &isu)
 })
+
+func InsertIsuCondition(isuc IsuCondition) {
+	isuc
+}
 
 var WriteImage = rpcgroup.Register(func(image []byte, jiaIsuUUID, jiaUserID string) {
 	filename := "/home/isucon/webapp/public/icon/" + jiaIsuUUID + "_" + jiaUserID
