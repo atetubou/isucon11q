@@ -927,7 +927,12 @@ func generateIsuGraphResponse(jiaIsuUUID string, graphDate time.Time) ([]GraphRe
 	timestampsInThisHour := []int64{}
 	var startTimeInThisHour time.Time
 
-	err := db.Select(&conditions, "SELECT * FROM `isu_condition` WHERE `jia_isu_uuid` = ? ORDER BY `timestamp` ASC", jiaIsuUUID)
+	err := db.Select(
+		&conditions,
+		"SELECT * FROM `isu_condition` WHERE `jia_isu_uuid` = ? AND timestamp >= ? ORDER BY `timestamp` ASC",
+		jiaIsuUUID,
+		graphDate.Truncate(time.Hour).Unix(),
+	)
 	if err != nil {
 		return nil, fmt.Errorf("db error: %v", err)
 	}
