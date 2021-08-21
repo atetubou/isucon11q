@@ -353,6 +353,7 @@ func postInitialize(c echo.Context) error {
 }
 
 var group = rpcgroup.New(12345, "app1:12345", "app2:12345", "app3:12345")
+var appgroup = rpcgroup.New(12340, "app1:12340", "app2:12340")
 var InitializeFunction = rpcgroup.Register(func(id string) {
 	initializeImage()
 	StartLogger(id)
@@ -606,7 +607,8 @@ func postIsu(c echo.Context) error {
 	}
 	defer tx.Rollback()
 
-	group.Client(0).Call(WriteImage, image, jiaIsuUUID, jiaUserID)
+	//group.Client(0).Call(WriteImage, image, jiaIsuUUID, jiaUserID)
+	appgroup.Call(WriteImage, image, jiaIsuUUID, jiaUserID)
 
 	_, err = tx.Exec("INSERT INTO `isu`"+
 		"	(`jia_isu_uuid`, `name`, `image`, `jia_user_id`) VALUES (?, ?, ?, ?)",
