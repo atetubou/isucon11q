@@ -762,16 +762,26 @@ func getIsuID(c echo.Context) error {
 	jiaIsuUUID := c.Param("jia_isu_uuid")
 
 	var res Isu
-	err = db.Get(&res, "SELECT * FROM `isu` WHERE `jia_user_id` = ? AND `jia_isu_uuid` = ?",
-		jiaUserID, jiaIsuUUID)
-	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return c.String(http.StatusNotFound, "not found: isu")
-		}
-
-		c.Logger().Errorf("db error: %v", err)
-		return c.NoContent(http.StatusInternalServerError)
+	isu, ok := cacheIsu.Load(IsuUserIDPair{
+		JIAIsuUUID: jiaIsuUUID,
+		JIAUserID:  jiaUserID,
+	})
+	if !ok {
+		return c.String(http.StatusNotFound, "not found: isu")
 	}
+	res = *isu.(*Isu)
+	/*
+		err = db.Get(&res, "SELECT * FROM `isu` WHERE `jia_user_id` = ? AND `jia_isu_uuid` = ?",
+			jiaUserID, jiaIsuUUID)
+		if err != nil {
+			if errors.Is(err, sql.ErrNoRows) {
+				return c.String(http.StatusNotFound, "not found: isu")
+			}
+
+			c.Logger().Errorf("db error: %v", err)
+			return c.NoContent(http.StatusInternalServerError)
+		}
+	*/
 
 	return c.JSON(http.StatusOK, res)
 }
@@ -880,16 +890,25 @@ func getIsuGraph(c echo.Context) error {
 	}
 	defer tx.Rollback()
 
-	var count int
-	err = tx.Get(&count, "SELECT COUNT(*) FROM `isu` WHERE `jia_user_id` = ? AND `jia_isu_uuid` = ?",
-		jiaUserID, jiaIsuUUID)
-	if err != nil {
-		c.Logger().Errorf("db error: %v", err)
-		return c.NoContent(http.StatusInternalServerError)
-	}
-	if count == 0 {
+	_, ok := cacheIsu.Load(IsuUserIDPair{
+		JIAIsuUUID: jiaIsuUUID,
+		JIAUserID:  jiaUserID,
+	})
+	if !ok {
 		return c.String(http.StatusNotFound, "not found: isu")
 	}
+	/*
+		var count int
+		err = tx.Get(&count, "SELECT COUNT(*) FROM `isu` WHERE `jia_user_id` = ? AND `jia_isu_uuid` = ?",
+			jiaUserID, jiaIsuUUID)
+		if err != nil {
+			c.Logger().Errorf("db error: %v", err)
+			return c.NoContent(http.StatusInternalServerError)
+		}
+		if count == 0 {
+			return c.String(http.StatusNotFound, "not found: isu")
+		}
+	*/
 
 	res, err := generateIsuGraphResponse(tx, jiaIsuUUID, date)
 	if err != nil {
