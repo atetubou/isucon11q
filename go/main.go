@@ -355,6 +355,14 @@ var InitializeFunction = rpcgroup.Register(func(id string) {
 	StartLogger(id)
 })
 
+var WriteImage = rpcgroup.Register(func(image []byte, jiaIsuUUID, jiaUserID string) {
+	filename := "/home/isucon/webapp/public/" + jiaIsuUUID + "_" + jiaUserID
+	err := ioutil.WriteFile(filename, image, 0644)
+	if err != nil {
+		log.Fatal(err)
+	}
+})
+
 // POST /api/auth
 // サインアップ・サインイン
 func postAuthentication(c echo.Context) error {
@@ -595,6 +603,8 @@ func postIsu(c echo.Context) error {
 	}
 	defer tx.Rollback()
 
+	group.Client(0).Call(WriteImage, image, jiaIsuUUID, jiaUserID)
+
 	_, err = tx.Exec("INSERT INTO `isu`"+
 		"	(`jia_isu_uuid`, `name`, `image`, `jia_user_id`) VALUES (?, ?, ?, ?)",
 		jiaIsuUUID, isuName, image, jiaUserID)
@@ -719,9 +729,8 @@ func getIsuIcon(c echo.Context) error {
 
 	jiaIsuUUID := c.Param("jia_isu_uuid")
 
-	var image []byte
-	err = db.Get(&image, "SELECT `image` FROM `isu` WHERE `jia_user_id` = ? AND `jia_isu_uuid` = ?",
-		jiaUserID, jiaIsuUUID)
+	filename := "/home/isucon/webapp/public/" + jiaIsuUUID + "_" + jiaUserID
+	image, err := ioutil.ReadFile(filename)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return c.String(http.StatusNotFound, "not found: isu")
@@ -732,6 +741,23 @@ func getIsuIcon(c echo.Context) error {
 	}
 
 	return c.Blob(http.StatusOK, "", image)
+
+	/*
+
+		var image []byte
+		err = db.Get(&image, "SELECT `image` FROM `isu` WHERE `jia_user_id` = ? AND `jia_isu_uuid` = ?",
+			jiaUserID, jiaIsuUUID)
+		if err != nil {
+			if errors.Is(err, sql.ErrNoRows) {
+				return c.String(http.StatusNotFound, "not found: isu")
+			}
+
+			c.Logger().Errorf("db error: %v", err)
+			return c.NoContent(http.StatusInternalServerError)
+		}
+
+		return c.Blob(http.StatusOK, "", image)
+	*/
 }
 
 // GET /api/isu/:jia_isu_uuid/graph
