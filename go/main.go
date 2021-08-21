@@ -24,7 +24,6 @@ import (
 	"github.com/isucon/isucon11-qualify/isucondition/rpcgroup"
 	"github.com/jmoiron/sqlx"
 	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
 	"github.com/labstack/gommon/log"
 )
 
@@ -218,12 +217,12 @@ func TraceMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 func main() {
 
 	e := echo.New()
-	e.Debug = true
-	e.Logger.SetLevel(log.DEBUG)
+	e.Debug = false
+	//e.Logger.SetLevel(log.DEBUG)
 
-	e.Use(middleware.Logger())
-	e.Use(middleware.Recover())
-	e.Use(TraceMiddleware)
+	//e.Use(middleware.Logger())
+	//e.Use(middleware.Recover())
+	//e.Use(TraceMiddleware)
 
 	e.POST("/initialize", postInitialize)
 
