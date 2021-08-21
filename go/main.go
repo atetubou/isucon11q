@@ -1114,18 +1114,28 @@ func getIsuConditions(c echo.Context) error {
 	}
 
 	var isuName string
-	err = db.Get(&isuName,
-		"SELECT name FROM `isu` WHERE `jia_isu_uuid` = ? AND `jia_user_id` = ?",
-		jiaIsuUUID, jiaUserID,
-	)
-	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return c.String(http.StatusNotFound, "not found: isu")
-		}
-
-		c.Logger().Errorf("db error: %v", err)
-		return c.NoContent(http.StatusInternalServerError)
+	isudata, ok := cacheIsu.Load(IsuUserIDPair{
+		JIAIsuUUID: jiaIsuUUID,
+		JIAUserID:  jiaUserID,
+	})
+	if !ok {
+		return c.String(http.StatusNotFound, "not found: isu")
 	}
+	isuName = isudata.(*Isu).Name
+	/*
+		err = db.Get(&isuName,
+			"SELECT name FROM `isu` WHERE `jia_isu_uuid` = ? AND `jia_user_id` = ?",
+			jiaIsuUUID, jiaUserID,
+		)
+		if err != nil {
+			if errors.Is(err, sql.ErrNoRows) {
+				return c.String(http.StatusNotFound, "not found: isu")
+			}
+
+			c.Logger().Errorf("db error: %v", err)
+			return c.NoContent(http.StatusInternalServerError)
+		}
+	*/
 
 	conditionsResponse, err := getIsuConditionsFromDB(db, jiaIsuUUID, endTime, conditionLevel, startTime, conditionLimit, isuName)
 	if err != nil {
