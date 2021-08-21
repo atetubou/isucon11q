@@ -26,8 +26,7 @@ CREATE TABLE `isu_condition` (
   PRIMARY KEY(`id`),
 
   -- For query like SELECT * FROM `isu_condition` WHERE `jia_isu_uuid` = '75dd6622-467f-46d7-98a3-67778a5fd826' ORDER BY `timestamp` DESC LIMIT 1
-  INDEX jia_isu_uuid_timestamp_idx(jia_isu_uuid, timestamp)
-
+  INDEX jia_isu_uuid_timestamp_idx(jia_isu_uuid, timestamp),
 ) ENGINE=InnoDB DEFAULT CHARACTER SET=utf8mb4;
 
 CREATE TABLE `user` (
