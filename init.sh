@@ -9,6 +9,7 @@ ensure_nginx_syntax
 restart_service_if_updated nginx
 
 echo '### mysql ###'
+update_if_differ mysql ./sql /home/isucon/webapp/sql
 update_if_differ mysql /home/isucon/isucon11q///etc/mysql/mariadb.conf.d/50-client.cnf /etc/mysql/mariadb.conf.d/50-client.cnf
 update_if_differ mysql /home/isucon/isucon11q///etc/mysql/mariadb.conf.d/50-mysql-clients.cnf /etc/mysql/mariadb.conf.d/50-mysql-clients.cnf
 update_if_differ mysql /home/isucon/isucon11q///etc/mysql/mariadb.conf.d/50-server.cnf /etc/mysql/mariadb.conf.d/50-server.cnf
