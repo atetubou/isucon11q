@@ -813,7 +813,7 @@ func getIsuIcon(c echo.Context) error {
 	if !ok {
 		return c.String(http.StatusNotFound, "not found: isu")
 	}
-	return c.Blob(http.StatusOK, "", isu.(Isu).Image)
+	return c.Blob(http.StatusOK, "", isu.(*Isu).Image)
 
 	/*
 		filename := "/home/isucon/webapp/public/icon/" + jiaIsuUUID + "_" + jiaUserID
