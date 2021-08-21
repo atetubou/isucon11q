@@ -22,6 +22,7 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/go-sql-driver/mysql"
 	"github.com/gorilla/sessions"
+	"github.com/isucon/isucon11-qualify/isucondition/lockmap"
 	"github.com/isucon/isucon11-qualify/isucondition/rpcgroup"
 	"github.com/jmoiron/sqlx"
 	"github.com/labstack/echo/v4"
@@ -381,6 +382,8 @@ func (o Isu) Load() interface{} {
 	return cp
 }
 */
+
+var cacheIsuCondition lockmap.LockMap
 
 func initializeCache() {
 	cacheIsu = sync.Map{}
