@@ -608,7 +608,8 @@ func postIsu(c echo.Context) error {
 	defer tx.Rollback()
 
 	//group.Client(0).Call(WriteImage, image, jiaIsuUUID, jiaUserID)
-	appgroup.Call(WriteImage, image, jiaIsuUUID, jiaUserID)
+
+	//appgroup.Call(WriteImage, image, jiaIsuUUID, jiaUserID) // TODO: FOR NOW
 
 	_, err = tx.Exec("INSERT INTO `isu`"+
 		"	(`jia_isu_uuid`, `name`, `image`, `jia_user_id`) VALUES (?, ?, ?, ?)",
@@ -752,6 +753,17 @@ func getIsuIcon(c echo.Context) error {
 
 	filename := "/home/isucon/webapp/public/icon/" + jiaIsuUUID + "_" + jiaUserID
 	image, err := ioutil.ReadFile(filename)
+
+	err2 := db.Get(&image, "SELECT `image` FROM `isu` WHERE `jia_user_id` = ? AND `jia_isu_uuid` = ?", jiaUserID, jiaIsuUUID)
+	if err2 != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			if err == nil {
+				log.Fatal("failed!:", err, filename, err2)
+			}
+			return c.String(http.StatusNotFound, "not found: isu")
+		}
+	}
+
 	if err != nil {
 		return c.String(http.StatusNotFound, "not found: isu")
 	}
