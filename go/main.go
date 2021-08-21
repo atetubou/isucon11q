@@ -717,7 +717,10 @@ func getIsuID(c echo.Context) error {
 	return c.JSON(http.StatusOK, res)
 }
 
+var icon_dir = "/home/isucon/webapp/public/icon/"
+
 func initializeImage() {
+	MustExecuteCommand("rm " + icon_dir + "*")
 	isuList := []Isu{}
 	err := db.Select(
 		&isuList,
@@ -748,12 +751,7 @@ func getIsuIcon(c echo.Context) error {
 	filename := "/home/isucon/webapp/public/icon/" + jiaIsuUUID + "_" + jiaUserID
 	image, err := ioutil.ReadFile(filename)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return c.String(http.StatusNotFound, "not found: isu")
-		}
-
-		c.Logger().Errorf("db error: %v", err)
-		return c.NoContent(http.StatusInternalServerError)
+		return c.String(http.StatusNotFound, "not found: isu")
 	}
 
 	return c.Blob(http.StatusOK, "", image)
