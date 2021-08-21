@@ -17,7 +17,7 @@ excludes:            # array
 include_statuses:    # array
 exclude_statuses:    # array
 no_headers:          # boolean
-aggregates: ['/users/[0-9]+', '/items/.*', '/transactions/.*', '/categories/.*/items/', '/upload/.*', '/new_items/.*']
+aggregates: ['/api/isu/.+/icon', '/api/isu/.+/graph','/api/isu/.+','/api/condition/.+','/isu/.+/icon','/isu/.+/graph', '/isu/.+']
 
 start_time:          # 2006-01-02T15:04:05
 end_time:            # 2006-01-02 15:04:05
