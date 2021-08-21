@@ -1322,7 +1322,7 @@ func postIsuCondition(c echo.Context) error {
 	h.WriteString(jiaIsuUUID)
 
 	// TODO: 一定割合リクエストを落としてしのぐようにしたが、本来は全量さばけるようにすべき
-	dropProbability := 90
+	dropProbability := 70
 	if h.Sum64()%100 < uint64(dropProbability) {
 		return c.NoContent(http.StatusAccepted)
 	}
