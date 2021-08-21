@@ -7,7 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"hash/maphash"
+	"hash/fnv"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -1318,8 +1318,8 @@ func postIsuCondition(c echo.Context) error {
 		return c.String(http.StatusBadRequest, "missing: jia_isu_uuid")
 	}
 
-	var h maphash.Hash
-	h.WriteString(jiaIsuUUID)
+	h := fnv.New64a()
+	h.Sum([]byte(jiaIsuUUID))
 
 	// TODO: 一定割合リクエストを落としてしのぐようにしたが、本来は全量さばけるようにすべき
 	dropProbability := 70
