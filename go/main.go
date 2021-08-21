@@ -363,6 +363,7 @@ var InitializeFunction = rpcgroup.Register(func(id string) {
 })
 
 var cacheIsu sync.Map
+var cacheIsuFromUUID sync.Map
 
 type IsuUserIDPair struct {
 	JIAIsuUUID string
@@ -383,6 +384,7 @@ func (o Isu) Load() interface{} {
 
 func initializeCache() {
 	cacheIsu = sync.Map{}
+	cacheIsuFromUUID = sync.Map{}
 
 	isuList := []Isu{}
 	err := db.Select(&isuList, "SELECT * FROM `isu`")
@@ -397,6 +399,7 @@ func initializeCache() {
 		}
 		isu_copied := isu
 		cacheIsu.Store(key, &isu_copied)
+		cacheIsuFromUUID.Store(isu.JIAIsuUUID, &isu_copied)
 	}
 }
 func init() {
@@ -409,6 +412,7 @@ var InsertIsu = rpcgroup.Register(func(isu Isu) {
 		JIAUserID:  isu.JIAUserID,
 	}
 	cacheIsu.Store(key, &isu)
+	cacheIsuFromUUID.Store(isu.JIAIsuUUID, &isu)
 })
 
 var WriteImage = rpcgroup.Register(func(image []byte, jiaIsuUUID, jiaUserID string) {
@@ -1315,13 +1319,16 @@ func postIsuCondition(c echo.Context) error {
 	}
 	defer tx.Rollback()
 
-	var count int
-	err = tx.Get(&count, "SELECT COUNT(*) FROM `isu` WHERE `jia_isu_uuid` = ?", jiaIsuUUID)
-	if err != nil {
-		c.Logger().Errorf("db error: %v", err)
-		return c.NoContent(http.StatusInternalServerError)
-	}
-	if count == 0 {
+	/*
+		var count int
+		err = tx.Get(&count, "SELECT COUNT(*) FROM `isu` WHERE `jia_isu_uuid` = ?", jiaIsuUUID)
+		if err != nil {
+			c.Logger().Errorf("db error: %v", err)
+			return c.NoContent(http.StatusInternalServerError)
+		}
+	*/
+	_, ok := cacheIsuFromUUID.Load(jiaIsuUUID)
+	if !ok {
 		return c.String(http.StatusNotFound, "not found: isu")
 	}
 
