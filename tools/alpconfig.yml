@@ -17,7 +17,7 @@ excludes:            # array
 include_statuses:    # array
 exclude_statuses:    # array
 no_headers:          # boolean
-aggregates: ['/api/isu/[0-9a-z\-].+/icon', '/api/isu/[0-9a-z\-].+/graph','/api/isu/[0-9a-z\-].+','/api/condition/[0-9a-z\-].+','^/isu/[0-9a-z\-].+/icon','^/isu/[0-9a-z\-].+/graph', '^/isu/[0-9a-z\-].+']
+matching_groups: ['/api/isu/[0-9a-z\-].+/icon', '/api/isu/[0-9a-z\-].+/graph','/api/isu/[0-9a-z\-].+','/api/condition/[0-9a-z\-].+','^/isu/[0-9a-z\-].+/icon','^/isu/[0-9a-z\-].+/graph', '^/isu/[0-9a-z\-].+']
 
 start_time:          # 2006-01-02T15:04:05
 end_time:            # 2006-01-02 15:04:05
