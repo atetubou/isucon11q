@@ -23,7 +23,7 @@ ensure_mysql_syntax
 restart_service_if_updated mysql
 
 echo '### isucondition.go.service ###'
-su isucon -c 'GOROOT=/home/isucon/local/go make -C ./go/'
+su isucon -c 'make -C ./go/'
 update_if_differ isucondition.go.service ./go/ /home/isucon/webapp/go
 update_if_differ isucondition.go.service /home/isucon/isucon11q///etc/systemd/system/isucondition.go.service /etc/systemd/system/isucondition.go.service
 restart_service_if_updated isucondition.go.service
