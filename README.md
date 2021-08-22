@@ -55,7 +55,7 @@ long_query_time = 0
 
 解析は次のようにやる。
 ```
-mysqldumpslow /var/log/mysql/mysql-slow.log -s t 
+mysqldumpslow /var/log/mysql/mysql-slow.log -s t
 ```
 
 
@@ -134,7 +134,7 @@ events {
 としてconnectionなどを増やすと負荷が高いときにエラーがでなくなる。
 また、Too many open filesに対してfile descriptorの数を増やす。
 
-/etc/security/limits.conf 
+/etc/security/limits.conf
 ```
 * hard nofile 65535
 * soft nofile 65535
@@ -246,7 +246,9 @@ See https://godoc.org/bitbucket.org/tailed/golang/rpccluster
 
 ```
 import "bitbucket.org/tailed/golang/rpccluster"
+
 var cluster *rpccluster.Cluster = rpccluster.NewCluster(20000, "app1:20000", "app2:20000", "app3:20000")
+
 func init() {
 	rpccluster.Register("InitializeMain", InitializeMain)
 }
@@ -288,4 +290,3 @@ sudo make install
 Goのコピーはshallowコピーなので、構造体をコピーするときは注意する必要がある。
 
 [deep-copy](https://github.com/globusdigital/deep-copy)
-
