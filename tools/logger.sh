@@ -128,7 +128,7 @@ record_nginx_log() {
 #		[ -x $alp ] || return 1
 #	fi
 #	cat $(log_file_name_of nginx) | $alp --config "$ALP_CONF"  > "$(log_file_name_of nginxalp txt)" || return 1
-	cat $(log_file_name_of nginx) | alp --config "$ALP_CONF"  > "$(log_file_name_of nginxalp txt)" || return 1
+	cat $(log_file_name_of nginx) | alp ltsv --config "$ALP_CONF"  > "$(log_file_name_of nginxalp txt)" || return 1
 }
 record_cpuprof() {
 	for i in $(ls $CPUPROF_FOLDER/*.prof)
