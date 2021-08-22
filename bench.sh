@@ -32,8 +32,8 @@ else
 fi
 
 PRECOMMAND=""
-info "git pull && git checkout $BRANCH"
-PRECOMMAND="cd ~/isucon11q/ && git fetch --all && git checkout $BRANCH && git pull &&"
+info "git fetch && git checkout origin/$BRANCH"
+PRECOMMAND="cd ~/isucon11q/ && git fetch --all && git checkout origin/$BRANCH &&"
 
 info "Execute init.sh"
 if [ -n "${TMUX:-}" ]
