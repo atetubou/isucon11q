@@ -23,8 +23,8 @@ install_go() {
 		rm -rf ./update-golang
 		git clone https://github.com/udhos/update-golang
 		cd update-golang
+    # installed to /usr/local/go
 		sudo ./update-golang.sh
-		make_symlink $TARGET_PATH
 	)
 }
 
