@@ -76,7 +76,7 @@ get_last_dir() {
 next_id() {
 	last_id=$(get_last_dir)
 	last_id=$((last_id + 1))
-	branch=$(git branch --show-current 2>/dev/null || true)
+	branch=$(basename $(git name-rev --name-only HEAD) 2>/dev/null || true)
 	[ -n "$branch" ] && branch="$branch-"
 	echo $branch$(printf '%04d' $last_id)
 }
@@ -108,7 +108,7 @@ record_git_information() {
 	FILENAME=$(log_file_name_of git txt)
 	date +"%Y-%m-%d %H:%M:%S" >>$FILENAME # This date information will be also used by record_journalctl
 
-	echo "Branch: $(git branch --show-current 2>/dev/null)" >>$FILENAME
+	echo "Branch: $(basename $(git name-rev --name-only HEAD) 2>/dev/null)" >>$FILENAME
 	echo "git diff $CURRENT_COMMIT" >>$FILENAME
 	git diff $CURRENT_COMMIT >>$FILENAME 2>&1
 }
@@ -121,13 +121,6 @@ record_nginx_log() {
 	cp $NGINX_LOG_FILE $(log_file_name_of nginx) || return 1
 	chmod 644 $(log_file_name_of nginx) || return 1
 
-#	alp=$(go env GOPATH)/bin/alp
-#	if [ ! -x $alp ]
-#	then
-#		go get github.com/tkuchiki/alp || return 1
-#		[ -x $alp ] || return 1
-#	fi
-#	cat $(log_file_name_of nginx) | $alp --config "$ALP_CONF"  > "$(log_file_name_of nginxalp txt)" || return 1
 	cat $(log_file_name_of nginx) | alp ltsv --config "$ALP_CONF"  > "$(log_file_name_of nginxalp txt)" || return 1
 }
 record_cpuprof() {
