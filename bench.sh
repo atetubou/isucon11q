@@ -71,5 +71,5 @@ tmux set-window-option synchronize-panes 0
 xpanes -x -s -c "echo 'Waiting for stopping logger...' && grep -m 1 'Successfully stopped logging' <(ssh -T {} 'journalctl -f -n 0 2>&1') && rsync -Cva {}:~/isucon11q/tools/log ~/ && exit"  $HOSTS
 tmux set-window-option synchronize-panes 1
 read -p 'Press enter to continue> '
-make -j 4 -C ~/
+make -j 4 -C ~/ >/dev/null 2>&1 &
 
