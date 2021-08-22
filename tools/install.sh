@@ -34,7 +34,7 @@ install_alp() {
 	(
 		echo "# Install alp"
 		cd /tmp
-		wget https://github.com/tkuchiki/alp/releases/download/v0.3.1/alp_linux_amd64.zip
+		wget https://github.com/tkuchiki/alp/releases/download/v1.0.7/alp_linux_amd64.zip
 		unzip alp_linux_amd64.zip
 		sudo mv alp $TARGET_PATH
 	)
