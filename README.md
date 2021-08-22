@@ -252,9 +252,7 @@ var cluster *rpccluster.Cluster = rpccluster.NewCluster(20000, "app1:20000", "ap
 func init() {
 	rpccluster.Register("InitializeMain", InitializeMain)
 }
-
 func getInitialize(c echo.Context) error {
-
     logid := GetNextLogID()
     cluster.CallAll("InitializeMain", logid)
     return c.String(204, "")
