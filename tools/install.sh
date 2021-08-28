@@ -3,16 +3,6 @@
 
 cd $(dirname $0)
 
-make_symlink() {
-	TARGET_PATH=$1
-	for bin in $(find /usr/local/go/bin -type f)
-	do
-		TARGET="$TARGET_PATH/$(basename "$bin")"
-		[ -f $TARGET ] && sudo mv $TARGET "$TARGET"_old
-		sudo cp --symbolic-link $bin $TARGET_PATH
-	done
-}
-
 install_go() {
 	TARGET_PATH=/usr/bin
         if which go > /dev/null 2>&1; then
