@@ -1,5 +1,5 @@
 #!/bin/bash -eu
-# install apt and go if not exists
+# install alp and go if not exists
 
 cd $(dirname $0)
 
