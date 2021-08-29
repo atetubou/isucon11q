@@ -18,8 +18,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/dgrijalva/jwt-go"
 	"github.com/go-sql-driver/mysql"
+	"github.com/golang-jwt/jwt/v4"
 	"github.com/gorilla/sessions"
 	"github.com/isucon/isucon11-qualify/isucondition/rpcgroup"
 	"github.com/jmoiron/sqlx"
